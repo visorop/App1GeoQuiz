@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">App1GeoQuiz</string>
+
+    <string name="quiz_text">Quiz Text</string>
+    <string name="action_true">True</string>
+    <string name="action_false">False</string>
+
+    <string name="action_settings">Settings</string>
+</resources>
