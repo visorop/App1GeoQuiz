@@ -4,6 +4,7 @@
     <string name="action_true">True</string>
     <string name="action_false">False</string>
     <string name="action_next">Next</string>
+    <string name="action_prev">Prev</string>
     <string name="toast_correct">Correct!</string>
     <string name="toast_incorrect">False</string>
 

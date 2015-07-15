@@ -12,6 +12,8 @@ import android.widget.Toast;
 import com.visorop.app1geoquiz.R;
 import com.visorop.app1geoquiz.model.TrueFalse;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 
@@ -20,6 +22,7 @@ public class QuizActivity extends Activity {
     private Button mButtonTrue;
     private Button mButtonFalse;
     private Button mButtonNext;
+    private Button mButtonPrev;
     private TextView mQuizText;
 
     private Random random = new Random();
@@ -32,7 +35,9 @@ public class QuizActivity extends Activity {
             new TrueFalse(R.string.question_asia, true),
     };
 
-    private int mCurrentIndex = 0;
+    private List<Integer> questionLogger = new ArrayList<Integer>();
+
+    private int mCurrentLoggerIndex = -1;
 
     private View.OnClickListener onClickListenerQuizActivity = new View.OnClickListener() {
 
@@ -41,27 +46,42 @@ public class QuizActivity extends Activity {
             int id = v.getId();
             switch(id){
                 // add more cases for more UI element`s click events
-                case R.id.button_true :
-                    if(mQuestionBank[mCurrentIndex].isTrueQuestion() == true){
-                        Toast.makeText(QuizActivity.this,R.string.toast_correct,Toast.LENGTH_SHORT).show();
-                    }else{
-                        Toast.makeText(QuizActivity.this,R.string.toast_incorrect,Toast.LENGTH_SHORT).show();
+                case R.id.button_true : {
+                    if (mQuestionBank[questionLogger.get(mCurrentLoggerIndex)].isTrueQuestion() == true) {
+                        Toast.makeText(QuizActivity.this, R.string.toast_correct, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(QuizActivity.this, R.string.toast_incorrect, Toast.LENGTH_SHORT).show();
                     }
                     break;
-                case R.id.button_false :
-                    if(mQuestionBank[mCurrentIndex].isTrueQuestion() == false){
-                        Toast.makeText(QuizActivity.this,R.string.toast_correct,Toast.LENGTH_SHORT).show();
-                    }else{
-                        Toast.makeText(QuizActivity.this,R.string.toast_incorrect,Toast.LENGTH_SHORT).show();
+                }
+                case R.id.button_false : {
+                    if (mQuestionBank[questionLogger.get(mCurrentLoggerIndex)].isTrueQuestion() == false) {
+                        Toast.makeText(QuizActivity.this, R.string.toast_correct, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(QuizActivity.this, R.string.toast_incorrect, Toast.LENGTH_SHORT).show();
                     }
                     break;
+                }
+                case R.id.text_quiz :
                 case R.id.button_next : {
-                    int newCurrentIndex;
-                    do{
-                        newCurrentIndex = random.nextInt(mQuestionBank.length - 1);
-                    }while(mCurrentIndex == newCurrentIndex);
-                    mCurrentIndex = newCurrentIndex;
-                    mQuizText.setText(mQuestionBank[mCurrentIndex].getQuestion());
+                    if(mCurrentLoggerIndex + 1 >= questionLogger.size()){
+                        int newQuestionIndex;
+                        do {
+                            newQuestionIndex = random.nextInt(mQuestionBank.length - 1);
+                        } while (questionLogger.get(mCurrentLoggerIndex) == newQuestionIndex);
+                        questionLogger.add(newQuestionIndex);
+
+                    }
+                    mQuizText.setText(mQuestionBank[questionLogger.get(++mCurrentLoggerIndex)].getQuestion());
+                    break;
+                }
+                case R.id.button_prev : {
+                    if(mCurrentLoggerIndex - 1 < 0) {
+                        Toast.makeText(QuizActivity.this, "No more previous questions.", Toast.LENGTH_SHORT).show();
+                    }else {
+                        mCurrentLoggerIndex--;
+                        mQuizText.setText(mQuestionBank[questionLogger.get(mCurrentLoggerIndex)].getQuestion());
+                    }
                     break;
                 }
             }
@@ -82,8 +102,16 @@ public class QuizActivity extends Activity {
         mButtonNext = (Button) this.findViewById(R.id.button_next);
         mButtonNext.setOnClickListener(onClickListenerQuizActivity);
 
+        mButtonPrev = (Button) this.findViewById(R.id.button_prev);
+        mButtonPrev.setOnClickListener(onClickListenerQuizActivity);
+
         mQuizText = (TextView) this.findViewById(R.id.text_quiz);
-        mQuizText.setText(mQuestionBank[mCurrentIndex].getQuestion());
+        mQuizText.setOnClickListener(onClickListenerQuizActivity);
+
+        int newQuestionIndex = random.nextInt(mQuestionBank.length - 1);
+        questionLogger.add(newQuestionIndex);
+        mCurrentLoggerIndex++;
+        mQuizText.setText(mQuestionBank[questionLogger.get(mCurrentLoggerIndex)].getQuestion());
     }
 
     @Override
