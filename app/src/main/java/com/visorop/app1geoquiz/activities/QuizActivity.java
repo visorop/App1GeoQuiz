@@ -2,6 +2,7 @@ package com.visorop.app1geoquiz.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +18,8 @@ import com.visorop.app1geoquiz.model.TrueFalse;
 
 
 public class QuizActivity extends Activity {
+
+    private static final String TAG = QuizActivity.class.getSimpleName();
 
     private Button mButtonTrue;
     private Button mButtonFalse;
@@ -79,6 +82,9 @@ public class QuizActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d(TAG,"onCreate() entered.");
+
         setContentView(R.layout.activity_quiz);
 
         mButtonTrue = (Button) this.findViewById(R.id.button_true);
@@ -120,5 +126,35 @@ public class QuizActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG,"onStart() entered");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume() entered");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause() entered");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop() entered");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy() entered");
     }
 }
