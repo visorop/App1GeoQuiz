@@ -38,12 +38,15 @@ public class Logger<T> {
 
     public void add(T newValue){
         logger.add(newValue);
-        currentIndex++;
+        if(currentIndex < 0){
+            currentIndex++;
+        }
     }
 
     public int goForwardAndAddIfNoMore(T value){
         if(goForward() < 0) {
             add(value);
+            currentIndex++;
         }
         return currentIndex;
     }

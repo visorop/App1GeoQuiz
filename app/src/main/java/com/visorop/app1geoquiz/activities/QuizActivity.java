@@ -1,6 +1,7 @@
 package com.visorop.app1geoquiz.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -23,6 +24,7 @@ public class QuizActivity extends Activity {
 
     private Button mButtonTrue;
     private Button mButtonFalse;
+    private Button mButtonCheat;
     private ImageButton mButtonNext;
     private ImageButton mButtonPrev;
     private TextView mQuizText;
@@ -36,7 +38,7 @@ public class QuizActivity extends Activity {
     };
 
     private RandomIndexGenerator randomIndexGenerator = new RandomIndexGenerator(mQuestionBank.length-1);
-    private Logger<Integer> logger = new Logger<Integer>();
+    private static Logger<Integer> logger = new Logger<Integer>();
 
     private View.OnClickListener onClickListenerQuizActivity = new View.OnClickListener() {
 
@@ -61,6 +63,14 @@ public class QuizActivity extends Activity {
                     }
                     break;
                 }
+                case R.id.cheat_button : {
+                    Intent intent = new Intent(QuizActivity.this,CheatActivity.class);
+                    boolean answerIsTrue = mQuestionBank[logger.getCurrent()].isTrueQuestion();
+                    intent.putExtra(CheatActivity.EXTRA_ANSWER_IS_TRUE, answerIsTrue);
+
+                    QuizActivity.this.startActivity(intent);
+                    break;
+                }
                 case R.id.text_quiz :
                 case R.id.button_next : {
                     logger.goForwardAndAddIfNoMore(randomIndexGenerator.getNextDifferentValue(logger.getCurrent()));
@@ -83,7 +93,13 @@ public class QuizActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d(TAG,"onCreate() entered.");
+        if(savedInstanceState == null){
+            Log.d(TAG,"savedInstanceState is null!!!");
+        }else{
+            Log.d(TAG,"savedInstanceState is NOT null");
+        }
+
+        Log.d(TAG, "onCreate() entered.");
 
         setContentView(R.layout.activity_quiz);
 
@@ -92,6 +108,9 @@ public class QuizActivity extends Activity {
 
         mButtonFalse = (Button) this.findViewById(R.id.button_false);
         mButtonFalse.setOnClickListener(onClickListenerQuizActivity);
+
+        mButtonCheat = (Button) this.findViewById(R.id.cheat_button);
+        mButtonCheat.setOnClickListener(onClickListenerQuizActivity);
 
         mButtonNext = (ImageButton) this.findViewById(R.id.button_next);
         mButtonNext.setOnClickListener(onClickListenerQuizActivity);
@@ -102,7 +121,9 @@ public class QuizActivity extends Activity {
         mQuizText = (TextView) this.findViewById(R.id.text_quiz);
         mQuizText.setOnClickListener(onClickListenerQuizActivity);
 
-        logger.add(randomIndexGenerator.getNextValue());
+        if(savedInstanceState == null){
+            logger.add(randomIndexGenerator.getNextValue());
+        }
         mQuizText.setText(mQuestionBank[logger.getCurrent()].getQuestion());
     }
 
@@ -156,5 +177,12 @@ public class QuizActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy() entered");
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(TAG,"onSaveInstanceState() entered");
+
     }
 }

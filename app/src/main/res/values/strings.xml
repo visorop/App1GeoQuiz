@@ -7,6 +7,10 @@
     <string name="action_prev">Prev</string>
     <string name="toast_correct">Correct!</string>
     <string name="toast_incorrect">False</string>
+    <string name="cheat_button">Cheat!</string>
+    <string name="warning_text">Are you sure you want to do this?</string>
+    <string name="show_answer_button">Show Answer</string>
+    <string name="judgment_toast">Cheating is wrong.</string>
 
     <string name="action_settings">Settings</string>
 
