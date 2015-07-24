@@ -17,6 +17,9 @@ import com.visorop.app1geoquiz.helper.Logger;
 import com.visorop.app1geoquiz.helper.RandomIndexGenerator;
 import com.visorop.app1geoquiz.model.TrueFalse;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 public class QuizActivity extends Activity {
 
@@ -29,6 +32,7 @@ public class QuizActivity extends Activity {
     private ImageButton mButtonPrev;
     private TextView mQuizText;
 
+
     private TrueFalse[] mQuestionBank = new TrueFalse[] {
             new TrueFalse(R.string.question_oceans, true),
             new TrueFalse(R.string.question_mideast, false),
@@ -38,7 +42,10 @@ public class QuizActivity extends Activity {
     };
 
     private RandomIndexGenerator randomIndexGenerator = new RandomIndexGenerator(mQuestionBank.length-1);
-    private static Logger<Integer> logger = new Logger<Integer>();
+
+    private static Logger<Integer> sLogger = new Logger<Integer>();
+    private static Set<Integer> sCheatedIndexes = new HashSet<>();
+
 
     private View.OnClickListener onClickListenerQuizActivity = new View.OnClickListener() {
 
@@ -48,40 +55,49 @@ public class QuizActivity extends Activity {
             switch(id){
                 // add more cases for more UI element`s click events
                 case R.id.button_true : {
-                    if (mQuestionBank[logger.getCurrent()].isTrueQuestion() == true) {
-                        Toast.makeText(QuizActivity.this, R.string.toast_correct, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(QuizActivity.this, R.string.toast_incorrect, Toast.LENGTH_SHORT).show();
+                    if(sCheatedIndexes.contains(sLogger.getCurrent())){
+                        Toast.makeText(QuizActivity.this, R.string.judgment_toast, Toast.LENGTH_SHORT).show();
+                    }else{
+                        if (mQuestionBank[sLogger.getCurrent()].isTrueQuestion() == true) {
+                            Toast.makeText(QuizActivity.this, R.string.toast_correct, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(QuizActivity.this, R.string.toast_incorrect, Toast.LENGTH_SHORT).show();
+                        }
                     }
+
                     break;
                 }
                 case R.id.button_false : {
-                    if (mQuestionBank[logger.getCurrent()].isTrueQuestion() == false) {
-                        Toast.makeText(QuizActivity.this, R.string.toast_correct, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(QuizActivity.this, R.string.toast_incorrect, Toast.LENGTH_SHORT).show();
+                    if(sCheatedIndexes.contains(sLogger.getCurrent())){
+                        Toast.makeText(QuizActivity.this, R.string.judgment_toast, Toast.LENGTH_SHORT).show();
+                    }else {
+                        if (mQuestionBank[sLogger.getCurrent()].isTrueQuestion() == false) {
+                            Toast.makeText(QuizActivity.this, R.string.toast_correct, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(QuizActivity.this, R.string.toast_incorrect, Toast.LENGTH_SHORT).show();
+                        }
                     }
                     break;
                 }
                 case R.id.cheat_button : {
                     Intent intent = new Intent(QuizActivity.this,CheatActivity.class);
-                    boolean answerIsTrue = mQuestionBank[logger.getCurrent()].isTrueQuestion();
+                    boolean answerIsTrue = mQuestionBank[sLogger.getCurrent()].isTrueQuestion();
                     intent.putExtra(CheatActivity.EXTRA_ANSWER_IS_TRUE, answerIsTrue);
 
-                    QuizActivity.this.startActivity(intent);
+                    QuizActivity.this.startActivityForResult(intent,0); // 0 is a magic value - could be anything, we are not interested in the request or return codes
                     break;
                 }
                 case R.id.text_quiz :
                 case R.id.button_next : {
-                    logger.goForwardAndAddIfNoMore(randomIndexGenerator.getNextDifferentValue(logger.getCurrent()));
-                    mQuizText.setText(mQuestionBank[logger.getCurrent()].getQuestion());
+                    sLogger.goForwardAndAddIfNoMore(randomIndexGenerator.getNextDifferentValue(sLogger.getCurrent()));
+                    mQuizText.setText(mQuestionBank[sLogger.getCurrent()].getQuestion());
                     break;
                 }
                 case R.id.button_prev : {
-                    if(logger.goBack() < 0) {
+                    if(sLogger.goBack() < 0) {
                         Toast.makeText(QuizActivity.this, "No more previous questions.", Toast.LENGTH_SHORT).show();
                     }else {
-                        mQuizText.setText(mQuestionBank[logger.getCurrent()].getQuestion());
+                        mQuizText.setText(mQuestionBank[sLogger.getCurrent()].getQuestion());
                     }
                     break;
                 }
@@ -122,9 +138,9 @@ public class QuizActivity extends Activity {
         mQuizText.setOnClickListener(onClickListenerQuizActivity);
 
         if(savedInstanceState == null){
-            logger.add(randomIndexGenerator.getNextValue());
+            sLogger.add(randomIndexGenerator.getNextValue());
         }
-        mQuizText.setText(mQuestionBank[logger.getCurrent()].getQuestion());
+        mQuizText.setText(mQuestionBank[sLogger.getCurrent()].getQuestion());
     }
 
     @Override
@@ -184,5 +200,13 @@ public class QuizActivity extends Activity {
         super.onSaveInstanceState(outState);
         Log.d(TAG,"onSaveInstanceState() entered");
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(data != null && data.getBooleanExtra(CheatActivity.EXTRA_ANSWER_SHOWN, false) == true){
+            sCheatedIndexes.add(sLogger.getCurrent());
+        }
     }
 }
